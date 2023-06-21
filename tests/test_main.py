@@ -5,7 +5,7 @@ from typing import Sequence
 
 import pytest
 
-import linelengthlinter.__main__ as main
+import latexlinelengthlinter.__main__ as main
 
 
 @dataclass(init=True)

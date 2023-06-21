@@ -1,0 +1,8 @@
+# .pre-commit-hooks.yaml
+- id: latexlinelengthlinter
+  name: LaTeX Line Length Linter
+  description: This hook checks the line length of LaTeX files.
+  entry: python -m latexlinelengthlinter
+  language: python
+  types: [tex]
+

@@ -1,8 +1,24 @@
 import argparse
+import logging
 import re
 import sys
 from pathlib import Path
 from typing import Sequence
+
+logger = logging.getLogger()
+
+
+def _setup_logging(verbosity: int):
+    logger.setLevel(1)
+    stream = logging.StreamHandler(sys.stderr)
+    formatter = logging.Formatter("[%(asctime)s - %(name)s - %(levelname)s] - %(message)s")
+    stream.setFormatter(formatter)
+    logger.addHandler(stream)
+
+    if verbosity > 0:
+        stream.setLevel(logging.DEBUG)
+    else:
+        stream.setLevel(logging.INFO)
 
 
 def load_ignore_envs(ignore_envs_arg, ignore_envs_file):
@@ -30,20 +46,22 @@ def check_line_length(
     with open(filename, "r") as file:
         for i, line in enumerate(file, start=1):
             # check for the start of an environment
-            environment_start_pattern = re.compile(r"\s*\\begin\{(" + "|".join(environments_to_ignore) + ")}")
-            environment_start_match = environment_start_pattern.match(line)
-            if environment_start_match:
-                environment_stack.append(environment_start_match.group(1))
+            env_start_pattern = re.compile(r"\s*\\begin\{(" + "|".join(environments_to_ignore) + ")}")
+            env_start_match = env_start_pattern.match(line)
+            if env_start_match:
+                environment_stack.append(env_start_match.group(1))
 
             # check for the end of an environment
-            environment_end_pattern = re.compile(r"\s*\\end\{(" + "|".join(environments_to_ignore) + ")}")
-            environment_end_match = environment_end_pattern.match(line)
-            if environment_end_match:
-                if environment_end_match.group(1) == environment_stack[-1]:
+            env_end_pattern = re.compile(r"\s*\\end\{(" + "|".join(environments_to_ignore) + ")}")
+            env_end_match = env_end_pattern.match(line)
+            if env_end_match:
+                if env_end_match.group(1) == environment_stack[-1]:
                     environment_stack.pop()
                 else:
-                    raise Exception(
-                        f"Environment '{environment_end_match.group(1)}' ended before previous environment '{environment_stack[-1]}'"
+                    # this shouldn't ever happen
+                    logger.warning(
+                        f"Environment '{env_end_match.group(1)}' ended before previous "
+                        f"environment '{environment_stack[-1]}'"
                     )
 
             if environment_stack:
@@ -62,13 +80,17 @@ def check_line_length(
     return file_incorrectly_formatted
 
 
-def main():
-    parser = argparse.ArgumentParser()
+def add_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("filenames", nargs="*", help="Filenames to check")
     parser.add_argument("--max-length", type=int, default=80, help="Maximum line length")
     parser.add_argument("--ignore-comments", action="store_false", help="Ignore comments")
     parser.add_argument("--ignore-envs", type=str, help="Additional environments to ignore (comma-separated)")
     parser.add_argument("--ignore-envs-file", type=str, help="File containing environments to ignore (one per line)")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    add_arguments(parser)
     args = parser.parse_args()
 
     ignore_envs = load_ignore_envs(args.ignore_envs, args.ignore_envs_file)

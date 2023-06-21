@@ -41,12 +41,15 @@ def check_line_length(
     max_length: int,
     check_comment_line_length: bool,
     environments_to_ignore: Sequence[str],
+    check_package_import: bool,
 ) -> bool:
     environment_stack = []
 
     file_incorrectly_formatted = False
     with open(filename, "r") as file:
         for i, line in enumerate(file, start=1):
+            if line.strip().startswith(r"\usepackage") and not check_package_import:
+                continue
             # check for the start of an environment
             env_start_pattern = re.compile(r"\s*\\begin\{(" + "|".join(environments_to_ignore) + ")}")
             env_start_match = env_start_pattern.match(line)
@@ -99,6 +102,7 @@ def add_arguments(parser: argparse.ArgumentParser):
         help="File containing environments to ignore (one per line)",
     )
     parser.add_argument("--ignore-starred-envs", type=str, help="Whether to ignore all starred ignored envs")
+    parser.add_argument("--include-package-imports", action="store_true", help="Include \\usepackage lines")
 
 
 def main():
@@ -117,7 +121,13 @@ def main():
         if not filename.exists():
             logger.error(f"Cannot find file at {filename}")
         else:
-            if check_line_length(filename, args.max_length, args.ignore_comments, ignore_envs):
+            if check_line_length(
+                filename,
+                args.max_length,
+                args.ignore_comments,
+                ignore_envs,
+                args.include_package_imports,
+            ):
                 return_value = 1
     sys.exit(return_value)
 

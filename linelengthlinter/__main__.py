@@ -97,8 +97,12 @@ def main():
 
     return_value = 0
     for filename in args.filenames:
-        if check_line_length(filename, args.max_length, args.ignore_comments, ignore_envs):
-            return_value = 1
+        filename = Path(filename).expanduser().resolve()
+        if not filename.exists():
+            logger.error(f"Cannot find file at {filename}")
+        else:
+            if check_line_length(filename, args.max_length, args.ignore_comments, ignore_envs):
+                return_value = 1
     sys.exit(return_value)
 
 

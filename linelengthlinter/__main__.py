@@ -86,6 +86,7 @@ def add_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--ignore-comments", action="store_false", help="Ignore comments")
     parser.add_argument("--ignore-envs", type=str, help="Additional environments to ignore (comma-separated)")
     parser.add_argument("--ignore-envs-file", type=str, help="File containing environments to ignore (one per line)")
+    parser.add_argument("--ignore-starred-envs", type=str, help="Whether to ignore all starred ignored envs")
 
 
 def main():
@@ -94,6 +95,9 @@ def main():
     args = parser.parse_args()
 
     ignore_envs = load_ignore_envs(args.ignore_envs, args.ignore_envs_file)
+
+    if args.ignore_starred_envs:
+        ignore_envs = [re.escape(e) + r"\*?" for e in ignore_envs]
 
     return_value = 0
     for filename in args.filenames:

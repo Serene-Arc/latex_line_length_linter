@@ -77,6 +77,16 @@ document_lines = {
     102: TestLine(120, True, ("equation",)),
     105: TestLine(80, True, ("equation",)),
     106: TestLine(80, True, ("equation",)),
+    111: TestLine(0, False, ("equation*",)),
+    114: TestLine(0, True, ("equation*",)),
+    117: TestLine(100, False, ("equation*",)),
+    118: TestLine(100, False, ("equation*",)),
+    121: TestLine(80, False, ("equation*",)),
+    122: TestLine(80, False, ("equation*",)),
+    125: TestLine(120, True, ("equation*",)),
+    126: TestLine(120, True, ("equation*",)),
+    129: TestLine(80, True, ("equation*",)),
+    130: TestLine(80, True, ("equation*",)),
 }
 
 
@@ -91,6 +101,11 @@ document_lines = {
         (80, False, ("float",)),
         (80, True, ("equation",)),
         (80, False, ("equation",)),
+        (80, False, (r"equation\*?",)),
+        (120, True, (r"equation\*?",)),
+        (120, True, ("equation", r"equation\*?")),
+        (120, True, ("equation", "equation\\*")),
+        (120, True, ("equation\\*",)),
     ),
 )
 def test_check_line_length(
@@ -103,6 +118,9 @@ def test_check_line_length(
     main.check_line_length(test_file, test_line_length, test_include_comments, test_exclude_environments)
     out, err = capsys.readouterr()
     results = extract_line_numbers_from_output(out.split("\n"))
+
+    for k in document_lines.keys():
+        document_lines[k].environments = [re.escape(e) for e in document_lines[k].environments]
 
     expected = filter(lambda i: i[1].length_limit == 0 or i[1].length_limit > test_line_length, document_lines.items())
     if not test_include_comments:

@@ -25,7 +25,8 @@ def load_ignore_envs(ignore_envs_arg, ignore_envs_file):
     ignore_envs = []
 
     if ignore_envs_arg is not None:
-        ignore_envs.extend(ignore_envs_arg.split(","))
+        for arg in ignore_envs_arg:
+            ignore_envs.extend(re.split(r"[, ]", arg))
     if ignore_envs_file is not None:
         with open(ignore_envs_file, "r") as file:
             for line in file:
@@ -84,7 +85,12 @@ def add_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("filenames", nargs="*", help="Filenames to check")
     parser.add_argument("--max-length", type=int, default=80, help="Maximum line length")
     parser.add_argument("--ignore-comments", action="store_false", help="Ignore comments")
-    parser.add_argument("--ignore-envs", type=str, help="Additional environments to ignore (comma-separated)")
+    parser.add_argument(
+        "--ignore-envs",
+        type=str,
+        action="append",
+        help="Additional environments to ignore (comma-separated)",
+    )
     parser.add_argument("--ignore-envs-file", type=str, help="File containing environments to ignore (one per line)")
     parser.add_argument("--ignore-starred-envs", type=str, help="Whether to ignore all starred ignored envs")
 

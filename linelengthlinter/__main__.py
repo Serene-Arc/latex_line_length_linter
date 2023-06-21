@@ -22,7 +22,7 @@ def _setup_logging(verbosity: int):
 
 
 def load_ignore_envs(ignore_envs_arg, ignore_envs_file):
-    ignore_envs = ["equation", "figure"]
+    ignore_envs = []
 
     if ignore_envs_arg is not None:
         ignore_envs.extend(ignore_envs_arg.split(","))

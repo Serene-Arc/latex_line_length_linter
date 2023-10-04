@@ -101,7 +101,7 @@ def add_arguments(parser: argparse.ArgumentParser):
         action="append",
         help="File containing environments to ignore (one per line)",
     )
-    parser.add_argument("--ignore-starred-envs", type=str, help="Whether to ignore all starred ignored envs")
+    parser.add_argument("--ignore-starred-envs", action="store_true", help="Whether to ignore all starred ignored envs")
     parser.add_argument("--include-package-imports", action="store_true", help="Include \\usepackage lines")
 
 
